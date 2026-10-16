@@ -1,4 +1,5 @@
 import pygame
+import os
 
 from . import settings as cfg
 
@@ -22,6 +23,16 @@ def main():
     
     jogador = [2, 5] # coluna e linha
     paredes = {(5, 3), (5, 4), (5, 5), (5, 6), (8, 8), (9, 8)}
+    bandeira = (12, 10)
+    venceu = False
+    
+    caminho_fonte = os.path.join("assets", "fonts", "PixelifySans-Medium.ttf")
+    
+    try:
+        font = pygame.font.Font(caminho_fonte, 25)
+    except FileNotFoundError:
+        print(f"Fonte não encontrada em {caminho_fonte}. Usando a fonte padrão.")
+        font = pygame.font.Font("None", 25)
     
     rodando = True
     while rodando:
@@ -31,7 +42,7 @@ def main():
             if evento.type == pygame.QUIT:
                 rodando = False
             
-            if evento.type == pygame.KEYDOWN:
+            if evento.type == pygame.KEYDOWN and not venceu:
                 dc, dl = 0, 0
                 if evento.key == pygame.K_LEFT:
                     dc = -1
@@ -50,13 +61,24 @@ def main():
                     jogador[0] = nova_col
                     jogador[1] = nova_linha
                 
+                if(tuple(jogador) == bandeira):
+                    venceu = True
+                
+            
+                
+                
         #Fase 3 DESENHAR
         tela.fill(cfg.COR_FUNDO)
         
         for col, linha in paredes:
             desenha_casa(tela, col, linha, cfg.COR_PAREDE)
             
+        desenha_casa(tela, bandeira[0], bandeira[1], cfg.COR_BANDEIRA)
         desenha_casa(tela, jogador[0], jogador[1], cfg.COR_JOGADOR)
+        
+        if venceu:
+            texto = font.render("Você pegou a bandeira!", True, (255, 255, 255))
+            tela.blit(texto, (100, 100))
         
         pygame.display.flip()
         relogio.tick(cfg.FPS)
